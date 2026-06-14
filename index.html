@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人口老龄化舆情分析 - 数据新闻</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        nav {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 15px 30px;
+            margin-bottom: 30px;
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        
+        nav a:hover, nav a.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .card h3 {
+            color: #555;
+            margin: 20px 0 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+        }
+        
+        .stat-card .label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .chart-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .chart-container iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .sentiment-chart {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .sentiment-item {
+            text-align: center;
+        }
+        
+        .sentiment-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .sentiment-neutral {
+            background: #909090;
+        }
+        
+        .sentiment-positive {
+            background: #4CAF50;
+        }
+        
+        .sentiment-negative {
+            background: #F44336;
+        }
+        
+        .word-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .word-tag {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .word-tag:hover {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .word-tag.large {
+            font-size: 20px;
+            padding: 12px 24px;
+        }
+        
+        .word-tag.medium {
+            font-size: 16px;
+            padding: 10px 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .filter-section {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-section select, .filter-section input {
+            padding: 10px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        footer {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .sentiment-chart {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .chart-container iframe {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="#home" class="active" onclick="showSection('home')">首页</a></li>
+                <li><a href="#analysis" onclick="showSection('analysis')">数据分析</a></li>
+                <li><a href="#report" onclick="showSection('report')">舆情报告</a></li>
+                <li><a href="#interactive" onclick="showSection('interactive')">互动数据</a></li>
+            </ul>
+        </nav>
+
+        <div id="home" class="section">
+            <div class="card">
+                <h2>人口老龄化舆情分析</h2>
+                <p style="color: #666; line-height: 1.8; margin-bottom: 20px;">
+                    人口老龄化是21世纪中国面临的重大社会挑战。本数据新闻基于2024年微博平台数据，
+                    深入分析公众对人口老龄化议题的关注热点、情绪倾向和舆论动态，
+                    为理解老龄化社会舆情提供数据支撑。
+                </p>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="number">16,246</div>
+                        <div class="label">微博帖子数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">8,582</div>
+                        <div class="label">有效评论数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">725K</div>
+                        <div class="label">总转发数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">5.3M</div>
+                        <div class="label">总点赞数</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>情绪分布概览</h2>
+                <div class="chart-container">
+                    <iframe src="charts/情绪分布饼图.html"></iframe>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>核心话题关键词</h2>
+                <div class="word-cloud">
+                    <span class="word-tag large">人口老龄化</span>
+                    <span class="word-tag large">养老</span>
+                    <span class="word-tag large">老年人</span>
+                    <span class="word-tag medium">生育政策</span>
+                    <span class="word-tag medium">养老金</span>
+                    <span class="word-tag medium">延迟退休</span>
+                    <span class="word-tag">再就业</span>
+                    <span class="word-tag">居家养老</span>
+                    <span class="word-tag">社会保障</span>
+                    <span class="word-tag">人口结构</span>
+                    <span class="word-tag">养老服务</span>
+                    <span class="word-tag">生育率</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="analysis" class="section" style="display: none;">
+            <div class="card">
+                <h2>话题影响力分析</h2>
+                <h3>关键传播节点（粉丝数TOP10）</h3>
+                <table>
+                    <tr><th>排名</th><th>账号</th><th>粉丝数</th></tr>
+                    <tr><td>1</td><td>中国新闻网</td><td>8206.7万</td></tr>
+                    <tr><td>2</td><td>新浪热点</td><td>7939.9万</td></tr>
+                    <tr><td>3</td><td>中国新闻周刊</td><td>6253.3万</td></tr>
+                    <tr><td>4</td><td>每日经济新闻</td><td>4834.7万</td></tr>
+                    <tr><td>5</td><td>新京报</td><td>4814.4万</td></tr>
+                    <tr><td>6</td><td>财经网</td><td>4053.8万</td></tr>
+                    <tr><td>7</td><td>新闻晨报</td><td>4052.0万</td></tr>
+                    <tr><td>8</td><td>央视财经</td><td>3808.8万</td></tr>
+                    <tr><td>9</td><td>澎湃新闻</td><td>3272.0万</td></tr>
+                    <tr><td>10</td><td>环球时报</td><td>3133.9万</td></tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>话题热度趋势</h2>
+                <div class="chart-container">
+                    <iframe src="charts/话题热度趋势折线图.html"></iframe>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>高频关键词</h2>
+                <div class="chart-container">
+                    <iframe src="charts/高频关键词条形图.html"></iframe>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>用户地域分布</h2>
+                <div class="chart-container">
+                    <iframe src="charts/用户地域分布条形图.html"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <div id="report" class="section" style="display: none;">
+            <div class="card">
+                <h2>一、舆情概述</h2>
+                <h3>1.1 事件背景</h3>
+                <p style="color: #666; line-height: 1.8;">
+                    人口老龄化是21世纪中国面临的重大社会挑战。根据国家统计局数据，截至2023年末，
+                    我国60岁及以上人口达2.8亿，占总人口的19.8%，65岁及以上人口达2.1亿，
+                    占总人口的14.9%，已进入深度老龄化社会。
+                </p>
+                
+                <h3>1.2 数据来源</h3>
+                <p style="color: #666;">
+                    - 数据平台：微博<br>
+                    - 采集时间：2024年1月1日至2024年12月31日<br>
+                    - 采集内容：与"人口老龄化"相关的微博帖子及其评论
+                </p>
+            </div>
+
+            <div class="card">
+                <h2>二、数据采集与处理</h2>
+                <h3>2.1 数据清洗流程</h3>
+                <p style="color: #666;">
+                    1. 数据去重：基于"评论用户名+评论内容"组合去除重复评论<br>
+                    2. 缺失值处理：删除评论内容为空的无效数据<br>
+                    3. 异常数据过滤：去除发布时间异常的数据
+                </p>
+                
+                <h3>2.2 文本预处理</h3>
+                <p style="color: #666;">
+                    1. 文本清洗：去除特殊符号、表情符号<br>
+                    2. 分词处理：使用jieba分词进行中文分词<br>
+                    3. 停用词过滤：去除常用无意义词汇<br>
+                    4. 情绪标注：基于情感词典进行情绪分类
+                </p>
+            </div>
+
+            <div class="card">
+                <h2>三、舆情数据分析</h2>
+                <h3>3.1 情绪分析</h3>
+                <div class="chart-container">
+                    <iframe src="charts/情绪分布饼图.html"></iframe>
+                </div>
+                
+                <h3>3.2 内容主题</h3>
+                <p style="color: #666;">
+                    主要讨论主题包括：养老政策、退休年龄、老年人就业、生育政策、养老服务等。
+                </p>
+            </div>
+
+            <div class="card">
+                <h2>四、结论与建议</h2>
+                <h3>4.1 主要发现</h3>
+                <p style="color: #666;">
+                    1. 人口老龄化议题具有广泛社会关注度<br>
+                    2. 媒体主导话题传播<br>
+                    3. 舆论整体理性客观<br>
+                    4. 核心关注领域明确：养老政策、老年人就业、生育问题
+                </p>
+                
+                <h3>4.2 政策建议</h3>
+                <p style="color: #666;">
+                    1. 加强养老服务体系建设<br>
+                    2. 完善社会保障体系<br>
+                    3. 推动老年人就业政策<br>
+                    4. 加强政策宣传解读<br>
+                    5. 关注特殊群体需求
+                </p>
+            </div>
+        </div>
+
+        <div id="interactive" class="section" style="display: none;">
+            <div class="card">
+                <h2>数据筛选与可视化</h2>
+                
+                <div class="filter-section">
+                    <select id="sentiment-filter">
+                        <option value="all">全部情绪</option>
+                        <option value="positive">正面</option>
+                        <option value="neutral">中性</option>
+                        <option value="negative">负面</option>
+                    </select>
+                    
+                    <select id="topic-filter">
+                        <option value="all">全部主题</option>
+                        <option value="养老">养老政策</option>
+                        <option value="就业">老年人就业</option>
+                        <option value="生育">生育政策</option>
+                        <option value="服务">养老服务</option>
+                    </select>
+                    
+                    <button class="btn" onclick="applyFilter()">应用筛选</button>
+                </div>
+                
+                <div id="filter-result">
+                    <h3>筛选结果</h3>
+                    <p style="color: #666;">选择筛选条件后点击"应用筛选"查看结果</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>情绪分布图表</h2>
+                <div class="chart-container">
+                    <iframe src="charts/情绪分布饼图.html"></iframe>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>热门话题标签</h2>
+                <div class="chart-container">
+                    <iframe src="charts/热门话题标签条形图.html"></iframe>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>用户认证类型分布</h2>
+                <div class="chart-container">
+                    <iframe src="charts/用户认证类型条形图.html"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>人口老龄化舆情分析数据新闻 | 数据来源：微博平台 | 2024年</p>
+        </footer>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+            document.querySelectorAll('nav a').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`nav a[href="#${sectionId}"]`).classList.add('active');
+        }
+        
+        function applyFilter() {
+            const sentiment = document.getElementById('sentiment-filter').value;
+            const topic = document.getElementById('topic-filter').value;
+            const resultDiv = document.getElementById('filter-result');
+            resultDiv.innerHTML = `
+                <h3>筛选结果</h3>
+                <p style="color: #666;">
+                    情绪筛选：${sentiment === 'all' ? '全部' : sentiment === 'positive' ? '正面' : sentiment === 'neutral' ? '中性' : '负面'}<br>
+                    主题筛选：${topic === 'all' ? '全部' : topic === '养老' ? '养老政策' : topic === '就业' ? '老年人就业' : topic === '生育' ? '生育政策' : '养老服务'}
+                </p>
+                <p style="color: #666; margin-top: 10px;">
+                    数据加载中...（实际应用中此处会显示筛选后的数据可视化图表）
+                </p>
+            `;
+        }
+    </script>
+</body>
+</html>
